@@ -10,7 +10,7 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <h4>TodoItem</h4>
         <hr />
@@ -63,4 +63,11 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryui")
+
+    <script>
+        $("#DueDate").datepicker({ dateFormat: 'yy/mm/dd' });
+        $("#CompletedDate").datepicker({ dateFormat: 'yy/mm/dd' });
+    </script>
+
 }
