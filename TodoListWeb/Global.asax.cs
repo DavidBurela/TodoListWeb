@@ -25,6 +25,7 @@ namespace TodoListWeb
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
 
             Database.SetInitializer(new ApplicationDbInitializer());
+            Database.SetInitializer(new TodoListDbInitializer());
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

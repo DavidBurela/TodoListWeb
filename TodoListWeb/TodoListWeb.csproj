@@ -165,6 +165,7 @@
     <Compile Include="Data\ApplicationDbInitializer.cs" />
     <Compile Include="Data\Repositories\TodoItemRepository.cs" />
     <Compile Include="Data\TodoListDbContext.cs" />
+    <Compile Include="Data\TodoListDbInitializer.cs" />
     <Compile Include="Data\Uow\TodoListUow.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
