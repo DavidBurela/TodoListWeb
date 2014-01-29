@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
+using TodoListWeb.Data;
 using TodoListWeb.Data.Repositories;
 using TodoListWeb.Data.Uow;
 
@@ -21,6 +23,8 @@ namespace TodoListWeb
             builder.RegisterType<TodoListUow>();
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+
+            Database.SetInitializer(new ApplicationDbInitializer());
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

@@ -162,6 +162,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TodoController.cs" />
+    <Compile Include="Data\ApplicationDbInitializer.cs" />
     <Compile Include="Data\Repositories\TodoItemRepository.cs" />
     <Compile Include="Data\TodoListDbContext.cs" />
     <Compile Include="Data\Uow\TodoListUow.cs" />
