@@ -21,7 +21,6 @@ namespace TodoListWeb.Data.Uow
         public void AddTodoItem(TodoItem todoItem)
         {
             // Requirement #2: add a new task to the system
-
             TodoItemRepository.Add(todoItem);
             TodoItemRepository.SaveChanges();
         }
