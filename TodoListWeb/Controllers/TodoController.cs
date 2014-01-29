@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using TodoListWeb.Data.Uow;
 using TodoListWeb.Models;
 using TodoListWeb.Data;
 
@@ -13,30 +14,30 @@ namespace TodoListWeb.Controllers
 {
     public class TodoController : Controller
     {
-        private TodoListDbContext db = new TodoListDbContext();
+        public TodoListUow TodoListUow { get; set; }
 
-        // GET: /Todo/
-        public ActionResult Index()
+        public TodoController(TodoListUow todoListUow)
         {
-            return View(db.TodoItems.ToList());
+            TodoListUow = todoListUow;
         }
 
-        // GET: /Todo/Details/5
-        public ActionResult Details(int? id)
+        // GET: /Todo/
+        [AllowAnonymous]
+        public ActionResult Index()
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            TodoItem todoitem = db.TodoItems.Find(id);
-            if (todoitem == null)
-            {
-                return HttpNotFound();
-            }
-            return View(todoitem);
+            IQueryable<TodoItem> data;
+
+            if (HttpContext.User.IsInRole("manager"))
+                // Requirement #5: Managers can view a list of the tasks with those due first at the top of the list
+                data = TodoListUow.GetAllTodoItems();
+            else
+                // Requirement #6: Anonymous can view a list of the outstanding tasks with those due first at the top of the list
+                data = TodoListUow.GetOutstandingTodoItems();
+            return View(data);
         }
 
         // GET: /Todo/Create
+        [Authorize(Roles = "manager")]
         public ActionResult Create()
         {
             return View();
@@ -47,12 +48,12 @@ namespace TodoListWeb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include="Id,Title,Details,DueDate,CompletedDate")] TodoItem todoitem)
+        [Authorize(Roles = "manager")]
+        public ActionResult Create([Bind(Include = "Id,Title,Details,DueDate")] TodoItem todoitem)
         {
             if (ModelState.IsValid)
             {
-                db.TodoItems.Add(todoitem);
-                db.SaveChanges();
+                TodoListUow.AddTodoItem(todoitem);
                 return RedirectToAction("Index");
             }
 
@@ -60,13 +61,14 @@ namespace TodoListWeb.Controllers
         }
 
         // GET: /Todo/Edit/5
+        [Authorize(Roles = "manager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            TodoItem todoitem = db.TodoItems.Find(id);
+            var todoitem = TodoListUow.FindTodoItemById((int)id);
             if (todoitem == null)
             {
                 return HttpNotFound();
@@ -79,50 +81,32 @@ namespace TodoListWeb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="Id,Title,Details,DueDate,CompletedDate")] TodoItem todoitem)
+        [Authorize(Roles = "manager")]
+        public ActionResult Edit([Bind(Include = "Id,Title,Details,DueDate,CompletedDate")] TodoItem todoitem)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(todoitem).State = EntityState.Modified;
-                db.SaveChanges();
+                TodoListUow.UpdateTodoItem(todoitem);
                 return RedirectToAction("Index");
             }
             return View(todoitem);
         }
 
-        // GET: /Todo/Delete/5
-        public ActionResult Delete(int? id)
+        // GET: /TodoItem/Complete/5
+        [Authorize(Roles = "manager")]
+        public ActionResult Complete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            TodoItem todoitem = db.TodoItems.Find(id);
+            var todoitem = TodoListUow.FindTodoItemById((int)id);
             if (todoitem == null)
             {
                 return HttpNotFound();
             }
-            return View(todoitem);
-        }
-
-        // POST: /Todo/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            TodoItem todoitem = db.TodoItems.Find(id);
-            db.TodoItems.Remove(todoitem);
-            db.SaveChanges();
+            TodoListUow.CompleteTodoItem((int)id);
             return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }
